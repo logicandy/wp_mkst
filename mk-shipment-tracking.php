@@ -32,6 +32,8 @@ Author URI: http://mkbox.org
 
 <?php
 
+error_reporting(E_ALL);
+
 if (!defined( "WPINC" )) {
 	die;
 }
@@ -43,8 +45,18 @@ $mkst_providers = array();
 function mkst_load_providers() {
     global $mkst_domain;
     global $mkst_providers;
+    global $mkst_provider_directory;
     $i = 0;
-    foreach ( glob( dirname( __FILE_ ) . $mkst_provider_directory . 'class_*.php' ) as $file ) {
+    foreach ( glob( dirname( __FILE__ ) . '/' . $mkst_provider_directory . '/class-*.php' ) as $file ) {
+        include( $mkst_provider_directory . '/' . basename( $file ) );
+        $arr_name = explode( '-', basename($file,'.php') );
+        array_shift( $arr_name );
+        foreach ($arr_name as $index => $word) {
+            $arr_name[$index] = ucfirst($word);
+        }
+        $class_name = implode( '_', $arr_name );
+        $provider = new $class_name();
+        $mkst_providers[] = array ( 'name' => $provider->get_display_name(), 'provider' => $provider );
         $i++;
     }
     if ( $i == 0 ) {
