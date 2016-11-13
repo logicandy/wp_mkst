@@ -1,0 +1,40 @@
+.mini {
+	font-size: 13px;
+    padding: 0.385em 0.923em 0.538em;
+    top: -0.385em;
+}
+
+.toggle-header {
+	cursor: pointer;
+	background-color: #fff;
+    color: #272727;
+    cursor: pointer;
+    display: block;
+    font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 114.2%;
+    font-weight: 400;
+    padding: 0px 15px;
+   	border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0.125em 0.275em 0 rgba(0, 0, 0, 0.125);
+    margin: 0 0 8px;
+}
+
+.toggle-header:before {
+	bottom: 0.1em;
+    color: #ccc;
+    content: ">";
+    display: inline-block;
+    font-family: "FontAwesome" !important;
+    font-size: 74%;
+    font-style: normal !important;
+    font-weight: normal !important;
+    margin-right: 10px;
+    position: relative;
+    text-decoration: inherit;
+    text-rendering: auto;
+    transition: all 0.3s ease 0s;
+}
+
+.datetime {
+    font-family: monospace;
+}
