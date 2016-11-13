@@ -38,65 +38,18 @@ if (!defined( "WPINC" )) {
 	die;
 }
 
-$mkst_domain = "mkst";
-$mkst_provider_directory = "includes/providers";
-$mkst_providers = array();
+require_once( 'class-mk-shipment-tracking.php' );
 
-function mkst_load_providers() {
-    global $mkst_domain;
-    global $mkst_providers;
-    global $mkst_provider_directory;
-    $i = 0;
-    foreach ( glob( dirname( __FILE__ ) . '/' . $mkst_provider_directory . '/class-*.php' ) as $file ) {
-        include( $mkst_provider_directory . '/' . basename( $file ) );
-        $arr_name = explode( '-', basename($file,'.php') );
-        array_shift( $arr_name );
-        foreach ($arr_name as $index => $word) {
-            $arr_name[$index] = ucfirst($word);
-        }
-        $class_name = implode( '_', $arr_name );
-        $provider = new $class_name();
-        $mkst_providers[] = array ( 'name' => $provider->get_display_name(), 'provider' => $provider );
-        $i++;
-    }
-    if ( $i == 0 ) {
-        $mkst_providers[] = array( 'name' => __( 'No providers found', $mkst_domain ), 'provider' => null );
-    }
+function mkst_cron_update() {
+    $inst = new MKST();
+    $inst->update_tracking_history();
 }
 
-function mkst_load_textdomain() {
-    load_plugin_textdomain( $mkst_domain, FALSE, basename( dirname( __FILE__ ) ) . '/lang/' );
+add_action( 'init', array( 'MKST', 'init' ) );
+add_action( 'mkst_cron', 'mkst_cron_update' );
+register_activation_hook( __FILE__, array( 'MKST', 'install' ) );
+if ( !wp_next_scheduled( 'mkst_cron' ) ) {
+    wp_schedule_event( time(), 'hourly', 'mkst_cron' );
 }
-
-function mkst_show_settings() {
-    global $mkst_providers;
-    
-    ?>
-
-    <div class="wrap">
-        <h2><?php _e( "Shipment Tracking Settings", $mkst_domain ); ?></h2>
-        <form method="post" action="<?php echo __FILE__; ?>">
-        <?php wp_nonce_field( "update-options" ); ?>
-        </form>
-    
-    <?php
-
-    var_dump( $mkst_providers );
-    foreach ( $mkst_providers as $provider ) {
-        echo "<h3>";
-        echo $provider['name'];
-        echo "</h3>";
-    }
-    echo '</div>';
-}
-
-mkst_load_providers();
-
-function mkst_add_menu() {
-    add_options_page( __( 'Shipment Tracking Settings', $mkst_domain ), __( 'Shipment Tracking', $mkst_domain ), 8, __FILE__, 'mkst_show_settings' );
-}
-
-add_action( 'plugins_loaded', 'mkst_load_textdomain' );
-add_action( 'admin_menu', 'mkst_add_menu' );
 
 ?>
