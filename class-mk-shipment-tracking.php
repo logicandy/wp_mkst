@@ -1,11 +1,7 @@
 <?php
 class MKST {
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-
-=======
 	
 	/** initializing class variables, maybe should make some final */
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	public static $db_version = '0.1.0';
 	public static $domain = 'mkst';
 
@@ -50,13 +46,9 @@ class MKST {
 	}
 
 	public function form_processing() {
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-	  if ( isset($_POST['act']) && sanitize_text_field( $_POST['act'] ) === 'add') {
-=======
 	  global $wpdb;
 
 	  if ( isset($_POST['act']) && sanitize_text_field( $_POST['act'] ) === 'add' ) {
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	    if ( !wp_verify_nonce( $_POST['_wpnonce'], self::$domain.'_add_tracking_element' ) ) {
 	      return false;
 	    }
@@ -76,13 +68,10 @@ class MKST {
 	    $this->result['options'] = $options;
 	    $this->result['options']['class_name'] = $provider_class;
 	    $this->result = $this->add_track_to_db( $this->result );
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	  } elseif ( isset($_GET['act']) && sanitize_text_field( $_GET['act'] ) === 'confirm' ) {
 	  	$track_id = sanitize_text_field( $_GET['id'] );
 	  	$user_id = get_current_user_id();
 	  	$wpdb->update( $this->user_table_name, array( 'received' => 1 ), array( 'track_id' => $track_id, 'user_id' => $user_id ) );
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	  }
 	}
 
@@ -95,8 +84,6 @@ class MKST {
 	  return false;
 	}
 
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	private function get_provider( $class_name ) {
 	  foreach ($this->providers as $provider) {
 	    if ( $provider['class_name'] == $class_name ) {
@@ -106,18 +93,12 @@ class MKST {
 	  return false;
 	}
 
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	public static function init() {
 		$class = __CLASS__;
 		new $class;
 	}
 
 	private function init_hooks() {
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-		add_action( 'admin_menu', array( $this, 'add_menu' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_styles' ), 99 );
-=======
 		$css_order = get_option( self::$domain.'_css_order' );
 		if ( empty( $css_order ) ) {
 			$css_order = 99;
@@ -125,7 +106,6 @@ class MKST {
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_styles' ), $css_order );
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 		add_shortcode( self::$domain.'_display_tracks_section', array( $this, 'show_tracks_section' ) );
 		add_shortcode( self::$domain.'_display_add_section', array( $this, 'show_add_section' ) );
 	}
@@ -185,16 +165,8 @@ class MKST {
 	              `operation_code` varchar(50),
 	              `destination_address` varchar(50),
 	              `destination_code` varchar(50),
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-	              `mail_direct_id` varchar(50),
 	              `mail_direct_name` varchar(50),
 	              `country_oper` varchar(50),
-	              `valid_ru_type` varchar(50),
-	              `valid_en_type` varchar(50),
-=======
-	              `mail_direct_name` varchar(50),
-	              `country_oper` varchar(50),
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	              `oper_type_id` varchar(50),
 	              `oper_type_name` varchar(50),
 	              `oper_attr_id` varchar(50),
@@ -203,10 +175,6 @@ class MKST {
 	              `item_weight` varchar(50),
 	              `complex_item_name` varchar(50),
 	              `mail_rank` varchar(50),
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-	              `post_rank` varchar(50),
-=======
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	              `mail_type` varchar(50),
 	              `mail_ctg` varchar(50),
 	              `rcpn` varchar(50),
@@ -283,10 +251,7 @@ class MKST {
 
 	public function register_settings() {
 	  register_setting( self::$domain, self::$domain.'_active_providers' );
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	  register_setting( self::$domain, self::$domain.'_css_order' );
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	  foreach ($this->providers as $provider ) {
 	  	foreach ($provider['instance']->get_options() as $option => $value) {
 	      register_setting( self::$domain, self::$domain.'_'.$provider['class_name'].'_'.$option );
@@ -322,55 +287,22 @@ class MKST {
 	}
 
 	public function show_main_section() {
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-	  echo '<ul>';
 	  $option = get_option( self::$domain.'_active_providers' );
 	  foreach ( $this->providers as $provider ) {
-	    echo '<li>';
-=======
-	  $option = get_option( self::$domain.'_active_providers' );
-	  foreach ( $this->providers as $provider ) {
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	    if ( !empty( $option ) && in_array( $provider['class_name'], $option ) ) {
 	      $checked = ' checked="checked"';
 	    } else {
 	      $checked = '';
 	    }
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-	    add_settings_field(self::$domain.'_active_providers', 
-	                      $provider['name'], 
-	                      array( $this,'show_main_option_checkbox' ), 
-=======
 	    add_settings_field( self::$domain.'_active_providers_'.$provider['name'], 
 	                      $provider['name'], 
 	                      array( $this, 'show_main_option_checkbox' ), 
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	                      __FILE__, 
 	                      self::$domain.'_main', 
 	                      array( 'name' => self::$domain.'_active_providers', 
 	                            'class_name' => $provider['class_name'],
 	                            'checked' => $checked ) );
 	  }
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-	}
-
-	public function show_providers_section() {
-	  foreach ($this->providers as $instance) {
-	    echo "<tr>";
-	    echo "<th colspan='2'>";
-	    echo "<h3>".$instance['name']."</h3>";
-	    echo "</th>";
-	    echo "</tr>";
-	    foreach ($instance['instance']->get_options() as $option => $value) {
-	      $value['name'] = self::$domain.'_'.$instance['class_name'].'_'.$option;
-	      add_settings_field( self::$domain.'_'.$instance['class_name'].'_'.$option, __( $value['display_name'], self::$domain ), 
-	                          array( $this, 'show_setting_field' ), 
-	                          __FILE__, 
-	                          self::$domain.'_providers', 
-	                          array( 'value' => $value, 
-	                                'class_name' => $instance['class_name'] ) 
-	                        );
-=======
 	  $value['name'] = self::$domain.'_css_order';
 	  add_settings_field( self::$domain.'_css_order',
 	  					__( 'CSS order', self::$domain ),
@@ -405,7 +337,6 @@ class MKST {
 	                          array( 'value' => $value )
 	                        );
 	  	  $first = false;
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	    }
 	  }
 	}
@@ -425,12 +356,9 @@ class MKST {
 	    wp_nonce_field( "update-options" );
 	    add_settings_section( self::$domain.'_main', __( 'Main plugin settings', self::$domain ), array( $this, 'show_main_section' ), __FILE__ );
 	    if ( !empty( $active_providers ) ) {
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	    	//foreach ($active_providers as $class) {
 	    		
 	    	//}
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	      add_settings_section( self::$domain.'_providers', __( 'Providers settings', self::$domain ), array( $this, 'show_providers_section' ), __FILE__ );
 	    }
 	    settings_fields(self::$domain);
@@ -441,13 +369,10 @@ class MKST {
 	  echo '</div>';
 	}
 
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	public function show_setting_provider_header( $args ) {
 	    echo "<h3>".$args['name']."</h3>";
 	}
 
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	public function show_setting_field( $args ) {
 	  echo "<input name='".$args['value']['name']."' id='".$args['value']['name']."' class='regular-text' type='text' value='".get_option($args['value']['name'])."' />";
 	  if ( isset( $args['value']['comment'] ) ) {
@@ -472,10 +397,7 @@ class MKST {
 	      $query = $wpdb->prepare( 'SELECT * FROM '.$this->tracks_table_name.' WHERE track_id=%d ORDER BY oper_date ASC;', $row['track_id'] );
 	      $result = $wpdb->get_results( $query, ARRAY_A );
 	      echo '<div class="tracks_content">';
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	      echo '<a href="?act=confirm&id='.$row['track_id'].'" class="confirm-right">'.__( 'Confirm receipt.', self::$domain ).'</a>';
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	      if ( empty( $result ) ) {
 	        _e( 'History not found.', self::$domain );
 	      } else {
@@ -497,11 +419,8 @@ class MKST {
 	      echo '</div>';
 	    }
 	    echo '</div>';
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	  } else {
 	  	_e( 'Active tracks not found.', self::$domain );
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	  }
 	}
 
@@ -516,12 +435,9 @@ class MKST {
 	      $options = unserialize( $row['track_info'] );
 	      $class = array_pop( $options );
 	      $history = $this->get_provider_instance( $class )->get_track_history( $options );
-<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
-=======
 	      if ( empty( $hisory ) ) {
 	      	return null;
 	      }
->>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 	      if ( !empty( $history['error'] ) ) {
 	      	throw new Exception( $history['error'], 1 );
 	      }
