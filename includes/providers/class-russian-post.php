@@ -91,27 +91,37 @@
 		        if ( isset( $rec->AddressParameters->MailDirect->NameRU ) && !empty( $rec->AddressParameters->MailDirect->NameRU ) ) {
 		        	$result[$i]['mail_direct_name'] = $rec->AddressParameters->MailDirect->NameRU;
 		        }
+<<<<<<< ba8eebbf4cacea3d144973820200acb59fe6a096
 		        if ( isset( $rec->AddressParameters->CountryOper->Id ) && !empty( $rec->AddressParameters->CountryOper->Id ) ) {
+=======
+		        if ( isset( $rec->AddressParameters->CountryOper->NameRu ) && !empty( $rec->AddressParameters->CountryOper->NameRu ) ) {
+>>>>>>> 1b11d27a1c435925de54f1dae44bc9145a7b7d08
 		        	$result[$i]['country_oper'] = $rec->AddressParameters->CountryOper->Id;
 		        }
 		        if ( isset( $rec->ItemParameters->Mass ) && !empty( $rec->ItemParameters->Mass ) ) {
 		        	$result[$i]['item_weight'] = round( floatval( $rec->ItemParameters->Mass ) / 1000, 3 );
 		        }
+<<<<<<< ba8eebbf4cacea3d144973820200acb59fe6a096
 		        if ( isset( $rec->ItemParameters->ValidRuType ) && !empty( $rec->ItemParameters->ValidRuType ) ) {
 		        	$result[$i]['valid_ru_type'] = $rec->ItemParameters->ValidRuType;
 		        }
 		        if ( isset( $rec->ItemParameters->ValidEnType ) && !empty( $rec->ItemParameters->ValidEnType ) ) {
 		        	$result[$i]['valid_en_type'] = $rec->ItemParameters->ValidEnType;
 		        }
+=======
+>>>>>>> 1b11d27a1c435925de54f1dae44bc9145a7b7d08
 		        if ( isset( $rec->ItemParameters->ComplexItemName ) && !empty( $rec->ItemParameters->ComplexItemName ) ) {
 		        	$result[$i]['complex_item_name'] = $rec->ItemParameters->ComplexItemName;
 		        }
 		        if ( isset( $rec->ItemParameters->MailRank->Name ) && !empty( $rec->ItemParameters->MailRank->Name ) ) {
 		        	$result[$i]['mail_rank'] = $rec->ItemParameters->MailRank->Name;
 		        }
+<<<<<<< ba8eebbf4cacea3d144973820200acb59fe6a096
 		        if ( isset( $rec->ItemParameters->PostRank->Name ) && !empty( $rec->ItemParameters->PostRank->Name ) ) {
 		        	$result[$i]['post_rank'] = $rec->ItemParameters->PostRank->Name;
 		        }
+=======
+>>>>>>> 1b11d27a1c435925de54f1dae44bc9145a7b7d08
 		        if ( isset( $rec->ItemParameters->MailType->Name ) && !empty( $rec->ItemParameters->MailType->Name ) ) {
 		        	$result[$i]['mail_type'] = $rec->ItemParameters->MailType->Name;
 		        }
