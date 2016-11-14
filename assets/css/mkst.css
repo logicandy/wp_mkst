@@ -37,4 +37,12 @@
 
 .datetime {
     font-family: monospace;
+<<<<<<< 7c7643f77c5c679589ec63c89f283dde4cdddcbe
+=======
+}
+
+.confirm-right {
+    float: right;
+    font-size: 0.9em;
+>>>>>>> 381b4d287bb01e06411d5750d3813d3dddb9eee7
 }
