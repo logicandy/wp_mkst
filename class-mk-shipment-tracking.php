@@ -259,6 +259,14 @@ class MKST {
 	  }
 	}
 
+	private function send_sms($phone, $text){
+		if(empty($phone)) return false;
+		$text_cp = urlencode($text);
+		$body=file_get_contents("http://sms.ru/sms/send?api_id=6f163a22-debf-3954-416d-e8dc05ec0d0f&to=".$phone."&text=".$text_cp."&from=MKBox");
+		logToFile("INFO: sms sending returned answer: $body");
+		return true;
+	}
+
 	public function show_add_section() {
 	  if ( !is_user_logged_in() ) {
 	    _e( 'You should be logged in to view this page.', self::$domain );
@@ -432,22 +440,22 @@ class MKST {
 	  $result = $wpdb->get_results( $query, ARRAY_A );
 	  $history = null;
 	  $updated_tracks = null;
-	  if ( $wpdb->num_rows > 0 ) {
+      if ( $wpdb->num_rows > 0 ) {
 	    foreach ($result as $row) {
 	      $options = unserialize( $row['track_info'] );
 	      $class = array_pop( $options );
 	      $history = $this->get_provider_instance( $class )->get_track_history( $options );
-	      if ( empty( $hisory ) ) {
+	      if ( empty( $history ) ) {
 	      	return null;
 	      }
 	      if ( !empty( $history['error'] ) ) {
 	      	throw new Exception( $history['error'], 1 );
 	      }
-	      $wpdb->update( $this->user_table_name, array( 'update_date' => current_time( 'mysql' ) ), array( 'track_id' => $row['track_id'] ) );
+	      $a = $wpdb->update( $this->user_table_name, array( 'update_date' => current_time( 'mysql' ) ), array( 'track_id' => $row['track_id'] ) );
 	      $query = $wpdb->prepare( 'SELECT MAX(oper_id) AS last_oper_id FROM '.$this->tracks_table_name.' WHERE track_id = %d', $row['track_id'] );
-	      $result = $wpdb->get_var( $query );
-	      if ( !empty( $result ) ) {
-	        $last_oper_id = $result;
+	      $var = $wpdb->get_var( $query );
+	      if ( !empty( $var ) ) {
+	        $last_oper_id = $var;
 	      } else {
 	        $last_oper_id = -1;
 	      }
@@ -456,6 +464,8 @@ class MKST {
         		$history[$i]['track_id'] = $row['track_id'];
 		        if ( !$wpdb->insert( $this->tracks_table_name, $history[$i] ) ) {
 		        	echo "Database error";
+		        } else {
+		        	$this->send_sms( '79059488212', "New status on shipment ".$row['track_id']." (".$row['desc']."): ".$history['oper_type_name']." (".$history['operation_address'].")" );
 		        }
 	        }
 	        $updated_tracks[] = array( 'track_id' => $row['track_id'] );
