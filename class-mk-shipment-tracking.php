@@ -393,16 +393,19 @@ class MKST {
 	    foreach ($result as $row) {
 	      $options = unserialize( $row['track_info'] );
 	      $class = array_pop( $options );
-	      echo '<div class="toggle-header">'.implode( ', ', $options ).', '.$row['desc'].'</div>';
 	      $query = $wpdb->prepare( 'SELECT * FROM '.$this->tracks_table_name.' WHERE track_id=%d ORDER BY oper_date ASC;', $row['track_id'] );
-	      $result = $wpdb->get_results( $query, ARRAY_A );
+	      $history = $wpdb->get_results( $query, ARRAY_A );
+	      echo '<div class="toggle-header">'.implode( ', ', $options ).', '.$row['desc'];
+	      echo '<span class="text-right">'.__( 'last oper.', self::$domain ).':'.date( 'd-m', strtotime( $history[count( $history )-1]['oper_date'] ) ).'; ';
+	      echo __( 'updated', self::$domain ).':'.date( 'd-m', strtotime( $row['update_date'] ) );
+	      echo '</span></div>';
 	      echo '<div class="tracks_content">';
 	      echo '<a href="?act=confirm&id='.$row['track_id'].'" class="confirm-right">'.__( 'Confirm receipt.', self::$domain ).'</a>';
-	      if ( empty( $result ) ) {
+	      if ( empty( $history ) ) {
 	        _e( 'History not found.', self::$domain );
 	      } else {
 	      	echo '<table>';
-	      	foreach ($result as $record) {
+	      	foreach ($history as $record) {
 	      		echo '<tr>';
 	      		echo '<td class="datetime">'.date( 'd-m H:i', strtotime( $record['oper_date'] ) ).'</td>';
 	      		$oper_code = "";
@@ -413,7 +416,6 @@ class MKST {
 	      		echo '<td>'.$record['oper_type_name'].'</td>';
 	      		echo '</tr>';
 	      	}
-	      	//var_dump($result);
 	      	echo '</table>';
 	      }
 	      echo '</div>';
