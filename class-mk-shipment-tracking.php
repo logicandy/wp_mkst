@@ -354,7 +354,7 @@ class MKST {
 	  					array( $this, 'show_setting_field' ),
 	  					__FILE__,
 	  					self::$domain.'_main',
-	  					array( 'value' => array( self::$domain.'_css_order' ) )
+	  					array( 'value' => array( 'name' => self::$domain.'_css_order' ) )
 	  					 );
 	  add_settings_field( self::$domain.'_sms_api_key',
 	  					__( 'SMS.RU API key', self::$domain ),
