@@ -35,8 +35,9 @@
 		}
 
 		public function get_track_history( $fields ) {
-			global $mkst_domain;
-			
+			$records = null;
+			$result = null;
+
 			$soap_vars = array( 'soap_version' => SOAP_1_2,
 								'trace' => true,
 								'exceptions' => false );
@@ -50,14 +51,17 @@
 			if ( is_a( $soap_result, 'soapFault' ) ) {
 				return array( 'error' => $soap_result->getMessage() );
 			}
+			if ( empty( (array) $soap_result->OperationHistoryData ) ) {
+				return array( 'error' => 'No history found');
+			}
 			$i = 0;
 			if ( is_array( $soap_result->OperationHistoryData->historyRecord ) ){
 		        $records = $soap_result->OperationHistoryData->historyRecord;
-		      } else {
+		    } else {
 		        $records[] = $soap_result->OperationHistoryData->historyRecord;
-		      }
-			foreach( $records as $rec ) {
-		        $result[$i]['oper_id']                   = $i;
+		    }
+		    foreach( $records as $rec ) {
+		        $result[$i]['oper_id'] = $i;
 		        if ( isset( $rec->OperationParameters->OperDate ) && !empty( $rec->OperationParameters->OperDate ) ) {
 		        	$result[$i]['oper_date'] = $rec->OperationParameters->OperDate;
 		        }
@@ -85,12 +89,6 @@
 		        if ( isset( $rec->AddressParameters->DestinationAddress->Description ) && !empty( $rec->AddressParameters->DestinationAddress->Description ) ) {
 		        	$result[$i]['destination_address'] = $rec->AddressParameters->DestinationAddress->Description;
 		        }
-		        if ( isset( $rec->AddressParameters->MailDirect->Id ) && !empty( $rec->AddressParameters->MailDirect->Id ) ) {
-		        	$result[$i]['mail_direct_id'] = $rec->AddressParameters->MailDirect->Id;
-		        }
-		        if ( isset( $rec->AddressParameters->MailDirect->NameRU ) && !empty( $rec->AddressParameters->MailDirect->NameRU ) ) {
-		        	$result[$i]['mail_direct_name'] = $rec->AddressParameters->MailDirect->NameRU;
-		        }
 		        if ( isset( $rec->AddressParameters->CountryOper->NameRu ) && !empty( $rec->AddressParameters->CountryOper->NameRu ) ) {
 		        	$result[$i]['country_oper'] = $rec->AddressParameters->CountryOper->Id;
 		        }
@@ -109,18 +107,9 @@
 		        if ( isset( $rec->ItemParameters->MailCtg->Name ) && !empty( $rec->ItemParameters->MailCtg->Name ) ) {
 		        	$result[$i]['mail_ctg'] = $rec->ItemParameters->MailCtg->Name;
 		        }
-		        /* not used
-		        $result[$i]['rcpn']                     = isset( $rec->UserParameters->Rcpn )$rec->UserParameters->Rcpn;
-		        $result[$i]['declaredValue']            = isset( $rec->FinanceParameters->Value )?round( floatval( $rec->FinanceParameters->Value ) / 100, 2 );
-		        $result[$i]['collectOnDeliveryPrice']   = isset( $rec->FinanceParameters->Payment )?round( floatval( $rec->FinanceParameters->Payment ) / 100, 2 );
-		        $result[$i]['financeMassRate']          = isset( $rec->FinanceParameters->MassRate )$rec->FinanceParameters->MassRate;
-		        $result[$i]['financeInsrRate']          = isset( $rec->FinanceParameters->InsrRate )$rec->FinanceParameters->InsrRate;
-		        $result[$i]['financeAirRate']           = isset( $rec->FinanceParameters->AirRate )$rec->FinanceParameters->AirRate;
-		        $result[$i]['financeRate']              = isset( $rec->FinanceParameters->Rate )$rec->FinanceParameters->Rate;
-				*/
 		        $i++;
 		    }
-			return $result;
+		    return $result;
 		}
 
 		public function set_option( $name, $value ) {

@@ -48,7 +48,7 @@ class MKST {
 	public function form_processing() {
 	  global $wpdb;
 
-	  if ( isset($_POST['act']) && sanitize_text_field( $_POST['act'] ) === 'add' ) {
+	  if ( isset( $_POST['act'] ) && sanitize_text_field( $_POST['act'] ) === 'add' ) {
 	    if ( !wp_verify_nonce( $_POST['_wpnonce'], self::$domain.'_add_tracking_element' ) ) {
 	      return false;
 	    }
@@ -64,15 +64,44 @@ class MKST {
 	        }
 	      }
 	    }
-	    $this->result['description'] = $_POST['ship_desc'];
-	    $this->result['options'] = $options;
-	    $this->result['options']['class_name'] = $provider_class;
-	    $this->result = $this->add_track_to_db( $this->result );
-	  } elseif ( isset($_GET['act']) && sanitize_text_field( $_GET['act'] ) === 'confirm' ) {
+	    $result['description'] = $_POST['ship_desc'];
+	    $result['options'] = $options;
+	    $result['options']['class_name'] = $provider_class;
+	    $this->result[] = $this->add_track_to_db( $result );
+	  } elseif ( isset( $_GET['act'] ) && sanitize_text_field( $_GET['act'] ) === 'confirm' ) {
 	  	$track_id = sanitize_text_field( $_GET['id'] );
 	  	$user_id = get_current_user_id();
 	  	$wpdb->update( $this->user_table_name, array( 'received' => 1 ), array( 'track_id' => $track_id, 'user_id' => $user_id ) );
+	  } elseif ( isset( $_POST['act'] ) && sanitize_text_field( $_POST['act'] ) == 'verify' ) {
+	  	if ( empty( $_POST['verify_code'] ) ) {
+	  		$phone = esc_attr( $_POST['phone'] );
+	  		$verify_code = $this->generate_string( 5 );
+	  		set_transient( 'cellphone_tr_'.get_current_user_id(), $phone, 10*MINUTE_IN_SECONDS );
+	  		set_transient( 'cellphone_verify_tr_'.get_current_user_id(), $verify_code, 10*MINUTE_IN_SECONDS );
+	  		$this->send_sms( preg_replace( '/\D+/', '', $phone ), $verify_code );
+	  		$this->result[] = __( 'Verify code was sent, it will be active for 10 minutes.', self::$domain );
+	  	} else {
+	  		$phone = get_transient( 'cellphone_tr_'.get_current_user_id() );
+	  		$verify = get_transient( 'cellphone_verify_tr_'.get_current_user_id() );
+	  		if ( false === $verify ) {
+	  			$this->result[] = __( 'Verifying code is overdue.', self::$domain );
+	  			return false;
+	  		}
+	  		if ( esc_attr( $_POST['verify_code'] == $verify ) ) {
+	  			delete_transient( 'cellphone_tr_'.get_current_user_id() );
+	  			delete_transient( 'cellphone_verify_tr_'.get_current_user_id() );
+	  			add_user_meta( get_current_user_id(), 'cellphone', preg_replace( '/\D+/', '', $phone ), true );
+	  			$this->result[] = __( 'Cellphone successfully verified.', self::$domain );
+	  		} else {
+	  			$this->result[] = __( 'Verifying code is wrong.', self::$domain );
+	  			return false;	
+	  		}
+	  	}
 	  }
+	}
+
+	private function generate_string( $length = 10 ) {
+		return substr( str_shuffle( str_repeat( $x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil( $length/strlen( $x ) ) ) ), 1, $length );
 	}
 
 	private function get_provider_instance( $class_name ) {
@@ -108,6 +137,7 @@ class MKST {
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_styles' ), $css_order );
 		add_shortcode( self::$domain.'_display_tracks_section', array( $this, 'show_tracks_section' ) );
 		add_shortcode( self::$domain.'_display_add_section', array( $this, 'show_add_section' ) );
+		add_shortcode( self::$domain.'_display_phone_section', array( $this, 'show_phone_section' ) );
 	}
 
 	private function init_vars() {
@@ -227,7 +257,8 @@ class MKST {
 	}
 
 	public function load_scripts() {
-	  wp_enqueue_script( self::$domain.'_js', plugins_url( 'assets/js/mkst.js', __FILE__ ), array( 'jquery-ui-accordion' ), '', true );
+	  wp_enqueue_script( 'jquery_masked_input', plugins_url( 'assets/js/jquery.maskedinput.min.js', __FILE__ ), array( 'jquery' ) );
+	  wp_enqueue_script( self::$domain.'_js', plugins_url( 'assets/js/mkst.js', __FILE__ ), array( 'jquery-ui-accordion', 'jquery_masked_input' ), '', true );
 	  $this->load_variables_js();
 	}
 
@@ -252,6 +283,7 @@ class MKST {
 	public function register_settings() {
 	  register_setting( self::$domain, self::$domain.'_active_providers' );
 	  register_setting( self::$domain, self::$domain.'_css_order' );
+	  register_setting( self::$domain, self::$domain.'_sms_api_key' );
 	  foreach ($this->providers as $provider ) {
 	  	foreach ($provider['instance']->get_options() as $option => $value) {
 	      register_setting( self::$domain, self::$domain.'_'.$provider['class_name'].'_'.$option );
@@ -262,8 +294,8 @@ class MKST {
 	private function send_sms($phone, $text){
 		if(empty($phone)) return false;
 		$text_cp = urlencode($text);
-		$body=file_get_contents("http://sms.ru/sms/send?api_id=6f163a22-debf-3954-416d-e8dc05ec0d0f&to=".$phone."&text=".$text_cp."&from=MKBox");
-		logToFile("INFO: sms sending returned answer: $body");
+		$sms_api = get_option( self::$domain.'_sms_api_key' );
+		$body=file_get_contents("http://sms.ru/sms/send?api_id=".$sms_api."&to=".$phone."&text=".$text_cp."&from=MKBox");
 		return true;
 	}
 
@@ -284,7 +316,13 @@ class MKST {
 	  $html .= '</select><input type="text" name="ship_desc" id="ship_desc" placeholder="'.__( 'Shipment description', self::$domain ).'" /></form></div></div>';
 
 	  if ( !empty( $this->result ) ) {
-	    echo '<p>'.$this->result.'</p>';
+	    if ( is_array( $this->result ) ) {
+	    	foreach ($this->result as $string) {
+	    		echo '<p>'.$string.'</p>';
+	    	}
+	    } else {
+	    	echo '<p>'.$this->result.'</p>';
+	    }
 	  }
 	  echo $button;
 	  echo $html;
@@ -311,14 +349,47 @@ class MKST {
 	                            'class_name' => $provider['class_name'],
 	                            'checked' => $checked ) );
 	  }
-	  $value['name'] = self::$domain.'_css_order';
 	  add_settings_field( self::$domain.'_css_order',
 	  					__( 'CSS order', self::$domain ),
 	  					array( $this, 'show_setting_field' ),
 	  					__FILE__,
 	  					self::$domain.'_main',
-	  					array( 'value' => $value )
+	  					array( 'value' => array( self::$domain.'_css_order' ) )
 	  					 );
+	  add_settings_field( self::$domain.'_sms_api_key',
+	  					__( 'SMS.RU API key', self::$domain ),
+	  					array( $this, 'show_setting_field'),
+	  					__FILE__,
+	  					self::$domain.'_main',
+	  					array( 'value' => array( 'name' => self::$domain.'_sms_api_key') ) 
+	  					 );
+	}
+
+	public function show_phone_section() {
+		$meta_phone = get_user_meta( get_current_user_id(), 'cellphone', true );
+		if ( !empty( $meta_phone ) ) {
+			$phone = $meta_phone;
+		} else {
+			$phone = get_transient( 'cellphone_tr_'.get_current_user_id() );
+		}
+		$head = '<div id="toggle_phone"><a>'.__( 'Cellphone', self::$domain ).'</a>';
+		$main = '<form method="POST" action"">'.wp_nonce_field( self::$domain.'_phone' ).'
+	<input type="hidden" name="act" value="verify" />';
+		if ( !empty( $phone ) ) {
+			$phone_input = '<p><a href="act=rm_phone">'.$phone.' ('.__( 'click to remove', self::$domain ).')</a></p>';
+			$notice = __( 'Your current phone, used for sms notification', self::$domain );
+			if ( empty( $meta_phone ) ) {
+				$verify = '<input type="text" name="verify_code" id="verify_code" placeholder="Verify code" /><input type="submit" name="submit" class="button mini" value="'.__( 'Verify', self::$domain ).'" />';
+			} else {
+				$verify = '';
+			}
+		} else {
+			$phone_input = '<p><input type="text" name="phone" id="phone_masked" value="'.$phone.'" />';
+			$notice = __( 'Provide phone number for receiving shipment updates by sms.', self::$domain );
+			$verify = '<input type="submit" name="submit" class="button mini" value="'.__( 'Save phone', self::$domain ).'" />';
+		}
+		$foot = '</p></form></div>';
+		echo $head.$main.$notice.$phone_input.$verify.$foot;
 	}
 
 	public function show_providers_section() {
@@ -364,9 +435,6 @@ class MKST {
 	    wp_nonce_field( "update-options" );
 	    add_settings_section( self::$domain.'_main', __( 'Main plugin settings', self::$domain ), array( $this, 'show_main_section' ), __FILE__ );
 	    if ( !empty( $active_providers ) ) {
-	    	//foreach ($active_providers as $class) {
-	    		
-	    	//}
 	      add_settings_section( self::$domain.'_providers', __( 'Providers settings', self::$domain ), array( $this, 'show_providers_section' ), __FILE__ );
 	    }
 	    settings_fields(self::$domain);
@@ -396,16 +464,27 @@ class MKST {
 	  }
 	  $query = $wpdb->prepare( 'SELECT * FROM '.$this->user_table_name.' WHERE user_id=%d AND received=0 ORDER BY add_date DESC;', get_current_user_id() );
 	  $result = $wpdb->get_results( $query, ARRAY_A );
-	  if ( $wpdb->num_rows > 0 ) {
+      if ( $wpdb->num_rows > 0 ) {
 	    echo '<div id="toggle_track">';
 	    foreach ($result as $row) {
+	      $history = null;
 	      $options = unserialize( $row['track_info'] );
 	      $class = array_pop( $options );
 	      $query = $wpdb->prepare( 'SELECT * FROM '.$this->tracks_table_name.' WHERE track_id=%d ORDER BY oper_date ASC;', $row['track_id'] );
 	      $history = $wpdb->get_results( $query, ARRAY_A );
+	      if ( empty( $history ) ) {
+	      	$operdate = "  -  -  ";
+	      } else {
+	      	$operdate = date( 'd-m', strtotime( $history[count( $history )-1]['oper_date'] ) );
+	      }
+	      if ( empty( $row['update_date'] ) ) {
+			$updatedate = "  -  -  ";
+	      } else {
+	      	$updatedate = date( 'd-m', strtotime( $row['update_date'] ) );
+	      }
 	      echo '<div class="toggle-header">'.implode( ', ', $options ).', '.$row['desc'];
-	      echo '<span class="text-right">'.__( 'last oper.', self::$domain ).':'.date( 'd-m', strtotime( $history[count( $history )-1]['oper_date'] ) ).'; ';
-	      echo __( 'updated', self::$domain ).':'.date( 'd-m', strtotime( $row['update_date'] ) );
+	      echo '<span class="text-right">'.__( 'last oper.', self::$domain ).':'.$operdate.'; ';
+	      echo __( 'updated', self::$domain ).':'.$updatedate;
 	      echo '</span></div>';
 	      echo '<div class="tracks_content">';
 	      echo '<a href="?act=confirm&id='.$row['track_id'].'" class="confirm-right">'.__( 'Confirm receipt.', self::$domain ).'</a>';
@@ -441,32 +520,36 @@ class MKST {
 	  $history = null;
 	  $updated_tracks = null;
       if ( $wpdb->num_rows > 0 ) {
-	    foreach ($result as $row) {
+		foreach ($result as $row) {
+	      $history = null;
 	      $options = unserialize( $row['track_info'] );
 	      $class = array_pop( $options );
 	      $history = $this->get_provider_instance( $class )->get_track_history( $options );
 	      if ( empty( $history ) ) {
-	      	return null;
+	      	continue;
 	      }
 	      if ( !empty( $history['error'] ) ) {
-	      	throw new Exception( $history['error'], 1 );
+	      	continue;
 	      }
 	      $a = $wpdb->update( $this->user_table_name, array( 'update_date' => current_time( 'mysql' ) ), array( 'track_id' => $row['track_id'] ) );
 	      $query = $wpdb->prepare( 'SELECT MAX(oper_id) AS last_oper_id FROM '.$this->tracks_table_name.' WHERE track_id = %d', $row['track_id'] );
 	      $var = $wpdb->get_var( $query );
-	      if ( !empty( $var ) ) {
+	      if ( $var != null ) {
 	        $last_oper_id = $var;
 	      } else {
 	        $last_oper_id = -1;
 	      }
 	      if ( $history[count( $history )-1]['oper_id'] > $last_oper_id ){
-	        for ($i = $last_oper_id + 1; $i < count( $history ); $i++) { 
-        		$history[$i]['track_id'] = $row['track_id'];
-		        if ( !$wpdb->insert( $this->tracks_table_name, $history[$i] ) ) {
-		        	echo "Database error";
-		        } else {
-		        	$this->send_sms( '79059488212', "New status on shipment ".$row['track_id']." (".$row['desc']."): ".$history['oper_type_name']." (".$history['operation_address'].")" );
-		        }
+	      	for ($i = $last_oper_id + 1; $i < count( $history ); $i++) { 
+        		if ( $history[$i] !== null ) {
+	        		$history[$i]['track_id'] = $row['track_id'];
+			        if ( !$wpdb->insert( $this->tracks_table_name, $history[$i] ) ) {
+			        	echo "Database error";
+			        } else {
+			        	$phone = get_user_meta( $row['user_id'], 'cellphone', true );
+			        	$this->send_sms( $phone, "New status on shipment (".$row['desc']."): ".$history[$i]['oper_type_name']." (".$history[$i]['operation_address'].")" );
+			        }
+			    }
 	        }
 	        $updated_tracks[] = array( 'track_id' => $row['track_id'] );
 	      }

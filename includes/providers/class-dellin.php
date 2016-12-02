@@ -76,14 +76,29 @@
               `mail_ctg` varchar(50)				shipment category (simple, ordered, financial rated, etc.)
               `rcpn` varchar(50)					shipment recipient
 
+			dellin order states:
+				0	processing
+				1	pickup
+				2	waiting
+				3	received
+				4	received_warehousing
+				5	inway
+				6	arrived
+				7	airport_warehousing
+				8	warehousing
+				9	delivery
+				10	accompanying_documents_return
+				11	finished
+				15	declined
         */
 		public function get_track_history( $fields ) {
 			global $mkst_domain;
 			
-			$result = null;
+			$history = null;
+			$date = null;
 			//here goes interaction with providers API
 			$doc_id = $fields['doc_id'];
-			$postdata = json_encode( array( 'appKey' => $this->options['app_key'], 
+			$postdata = json_encode( array( 'appKey' => $this->options['app_key']['value'], 
 											'docid' => $doc_id  ) );
 			$opts = array('http' => array(
 								        'method'  => 'POST',
@@ -92,8 +107,105 @@
 								    )
 								);
 			$context  = stream_context_create($opts);
-			$result = file_get_contents( $this->options['api_href'], false, $context );
-			$result = json_decode($result);
+			$history = file_get_contents( $this->options['api_href']['value'], false, $context );
+			$history = json_decode($history);
+
+			if ( !empty( $history->errors ) ) {
+				return array( "error" => $history->errors->docid );
+			}
+			$result[$opid]['operation_address'] = $history->derival_city;
+			switch ($history->state) {
+				case 'processing':
+					$opid = 0;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->processing_date );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				case 'pickup':
+					$opid = 1;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->pickup );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				case 'waiting':
+					$opid = 2;
+					$result[$opid]['oper_id'] = $opid;
+					$result[$opid]['oper_date'] = date( 'Y-m-d H:i:s' );
+					break;
+				case 'received':
+					$opid = 3;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->arrival_to_osp_sender );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				case 'received_warehousing':
+					$opid = 4;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->warehousing );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				case 'inway':
+					$opid = 5;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->derrival_from_osp_sender );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				case 'arrived':
+					$opid = 6;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->arrival_to_osp_receiver );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					$result[$opid]['operation_address'] = $history->arrival_city;
+					break;
+				case 'airport_warehousing':
+					$opid = 7;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->warehousing );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					$result[$opid]['operation_address'] = $history->arrival_city;
+					break;
+				case 'warehousing':
+					$opid = 8;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->warehousing );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					$result[$opid]['operation_address'] = $history->arrival_city;
+					break;
+				case 'delivery':
+					$opid = 9;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->derrival_from_osp_receiver );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					$result[$opid]['operation_address'] = $history->arrival_city;
+					break;
+				case 'accompanying_documents_return':
+					$opid = 10;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->derrival_from_osp_recevier_accdoc );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				case 'finished':
+					$opid = 11;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->finish );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					$result[$opid]['operation_address'] = $history->arrival_city;
+					break;
+				case 'declined':
+					$opid = 15;
+					$result[$opid]['oper_id'] = $opid;
+					$date = DateTime::createFromFormat( 'Y-m-d', $history->order_dates->decline_date );
+					$result[$opid]['oper_date'] = $date->format( 'Y-m-d H:i:s' );
+					break;
+				default:
+					return array( 'error' => 'unknown operation: '.$history->state );
+			}
+			$result[$opid]['destination_address'] = $history->arrival_city;
+			$result[$opid]['oper_type_name'] = $history->state_name;
+			for ( $i=0; $i < $opid; $i++ ) { 
+				$result[$i] = null;
+			}
+
 			return $result;
 		}
 

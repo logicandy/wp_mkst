@@ -7,6 +7,11 @@ jQuery(document).ready(function($) {
     active: false,
     collapsible: true
   });
+  $('#toggle_phone').accordion({
+    active: false,
+    collapsible: true
+  })
+  $('#phone_masked').mask("+7 (999) 999-9999");
   $('#ship_provider').change(function() {
 	$('#ship_desc').nextAll().remove();
   	htmlstr = '';
