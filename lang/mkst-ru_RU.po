@@ -1,0 +1,158 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: MK Shipment Tracking\n"
+"POT-Creation-Date: 2016-12-02 16:41+0700\n"
+"PO-Revision-Date: 2016-12-02 17:01+0700\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.7\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-WPHeader: mk-shipment-tracking.php\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
+"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: class-mk-shipment-tracking.php:26 class-mk-shipment-tracking.php:427
+msgid "Shipment Tracking Settings"
+msgstr "Настройки отслеживания отправлений"
+
+#: class-mk-shipment-tracking.php:26
+msgid "Shipment Tracking"
+msgstr "Отслеживание отправлений"
+
+#: class-mk-shipment-tracking.php:39
+msgid "Tracking info successfully added."
+msgstr "Информация для отслеживания успешно добавлена."
+
+#: class-mk-shipment-tracking.php:41
+msgid "An error occured, tracking info not added."
+msgstr "Возникла ошибка, информация для отслеживания не была добавлена."
+
+#: class-mk-shipment-tracking.php:44
+msgid "Looks like this track already exists."
+msgstr "Этот трэк уже отслеживается."
+
+#: class-mk-shipment-tracking.php:82
+msgid "Verify code was sent, it will be active for 10 minutes."
+msgstr "Код подтверждения отправлен. Введите его в течение 10 минут."
+
+#: class-mk-shipment-tracking.php:87
+msgid "Verifying code is overdue."
+msgstr "Код подтверждения просрочен."
+
+#: class-mk-shipment-tracking.php:94
+msgid "Cellphone successfully verified."
+msgstr "Номер телефона успешно подтверждён."
+
+#: class-mk-shipment-tracking.php:96
+msgid "Verifying code is wrong."
+msgstr "Неверный код подтверждения."
+
+#: class-mk-shipment-tracking.php:275
+msgid "add new track"
+msgstr "добавить трэк"
+
+#: class-mk-shipment-tracking.php:304 class-mk-shipment-tracking.php:462
+msgid "You should be logged in to view this page."
+msgstr "Вы должны авторизоваться для просмотра этой страницы."
+
+#: class-mk-shipment-tracking.php:307
+msgid "Add new track"
+msgstr "Добавить трэк"
+
+#: class-mk-shipment-tracking.php:312
+msgid "Select provider"
+msgstr "Выберите ТК"
+
+#: class-mk-shipment-tracking.php:316
+msgid "Shipment description"
+msgstr "Описание отправления"
+
+#: class-mk-shipment-tracking.php:353
+msgid "CSS order"
+msgstr "порядок CSS"
+
+#: class-mk-shipment-tracking.php:360
+msgid "SMS.RU API key"
+msgstr ""
+
+#: class-mk-shipment-tracking.php:375
+msgid "Cellphone"
+msgstr "Телефон"
+
+#: class-mk-shipment-tracking.php:379
+msgid "click to remove"
+msgstr "нажмите для удаления"
+
+#: class-mk-shipment-tracking.php:380
+msgid "Your current phone, used for sms notification"
+msgstr "Текущий номер, используемый для смс оповещений"
+
+#: class-mk-shipment-tracking.php:382
+msgid "Verify"
+msgstr "Подтвердить"
+
+#: class-mk-shipment-tracking.php:388
+msgid "Provide phone number for receiving shipment updates by sms."
+msgstr "Укажите номер телефона, чтобы получать оповещения по смс."
+
+#: class-mk-shipment-tracking.php:389
+msgid "Save phone"
+msgstr "Сохранить"
+
+#: class-mk-shipment-tracking.php:431
+msgid "No providers found."
+msgstr "Не найдены ТК."
+
+#: class-mk-shipment-tracking.php:436
+msgid "Main plugin settings"
+msgstr "Основные настройки"
+
+#: class-mk-shipment-tracking.php:438
+msgid "Providers settings"
+msgstr "Настройки ТК"
+
+#: class-mk-shipment-tracking.php:486
+msgid "last oper."
+msgstr "посл. опер."
+
+#: class-mk-shipment-tracking.php:487
+msgid "updated"
+msgstr "обновлено"
+
+#: class-mk-shipment-tracking.php:490
+msgid "Confirm receipt."
+msgstr "Подтвердить получение."
+
+#: class-mk-shipment-tracking.php:492
+msgid "History not found."
+msgstr "История не найдена."
+
+#: class-mk-shipment-tracking.php:512
+msgid "Active tracks not found."
+msgstr "Не найдено активных трэков."
+
+#. Plugin Name of the plugin/theme
+msgid "MK Shipment Tracking"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://mkst.projects.mkbox.org"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Get shipment tracking information from many shipping companies"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://mkbox.org"
+msgstr ""
